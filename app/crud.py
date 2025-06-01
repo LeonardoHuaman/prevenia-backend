@@ -10,9 +10,12 @@ def create_doctor(db: Session, doc: schemas.DoctorCreate):
         nombre=doc.nombre,
         especialidad=doc.especialidad,
         correo=doc.correo,
-        hashed_pw=hashed
+        hashed_pw=hashed,
+        clinic_name  = doc.clinic_name
     )
     db.add(db_doc)
     db.commit()
     db.refresh(db_doc)
     return db_doc
+
+

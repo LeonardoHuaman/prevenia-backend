@@ -13,7 +13,6 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
     
-# Para usar en tus endpoints
 def get_db():
     db = SessionLocal()
     try:

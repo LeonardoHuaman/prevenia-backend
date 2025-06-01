@@ -12,3 +12,4 @@ class Doctor(Base):
     correo      = Column(String, unique=True, index=True, nullable=False)
     hashed_pw   = Column(String, nullable=False)
     creado_el   = Column(DateTime, default=datetime.utcnow)
+    clinic_name  = Column(String, nullable=False)

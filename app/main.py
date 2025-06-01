@@ -1,13 +1,25 @@
 # main.py
+
 from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 import models, schemas, crud, auth
 from database import SessionLocal, engine
-from jose import JWTError
 
 models.Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="API Hospitalaria 🏥")
+app = FastAPI(title="API del Prevenia")
+
+# ─── Configurar CORS (opcional, pero recomendado si usas React en otro puerto) ───
+origins = ["*"]  # en producción, reemplaza "*" por tu dominio/frontend concreto
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 def get_db():
     db = SessionLocal()
@@ -15,13 +27,10 @@ def get_db():
         yield db
     finally:
         db.close()
-        
+
 @app.get("/", tags=["Root"])
 def read_root():
     return {"message": "Bienvenido a la API del Prevenia "}
-
-
-#================DOCTOR ROUTES================#
 
 @app.post("/register/doctor", response_model=schemas.DoctorOut)
 def register_doctor(doctor: schemas.DoctorCreate, db: Session = Depends(get_db)):
@@ -34,8 +43,7 @@ def register_doctor(doctor: schemas.DoctorCreate, db: Session = Depends(get_db))
     return nuevo
 
 @app.post("/login/doctor", response_model=schemas.Token)
-def login_doctor(form_data: schemas.DoctorCreate, db: Session = Depends(get_db)):
-    # Usamos correo + password del mismo schema para simplificar
+def login_doctor(form_data: schemas.DoctorLogin, db: Session = Depends(get_db)):
     db_doc = crud.get_doctor_by_email(db, form_data.correo)
     if not db_doc or not auth.verify_password(form_data.password, db_doc.hashed_pw):
         raise HTTPException(
@@ -45,3 +53,10 @@ def login_doctor(form_data: schemas.DoctorCreate, db: Session = Depends(get_db))
         )
     token = auth.create_access_token({"sub": db_doc.correo})
     return {"access_token": token, "token_type": "bearer"}
+
+@app.get("/doctors/me", response_model=schemas.DoctorProfile)
+def read_current_doctor(current_doc: models.Doctor = Depends(auth.get_current_doctor)):
+    """
+    Ruta protegida: devuelve { nombre, clinic_name } del doctor autenticado.
+    """
+    return current_doc
