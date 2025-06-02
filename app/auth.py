@@ -13,10 +13,6 @@ from sqlalchemy.orm import Session
 import crud, models
 from database import SessionLocal
 
-# ----------------------------------------------------------------
-# CONFIGURACIÓN BÁSICA DE JWT Y BCRYPT
-# ----------------------------------------------------------------
-
 SECRET_KEY = "super_secreto"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
@@ -43,17 +39,11 @@ def decode_access_token(token: str) -> dict:
     return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
 
 
-# ----------------------------------------------------------------
-# OAuth2PasswordBearer: toma el token del header "Authorization"
-# ----------------------------------------------------------------
 
 # tokenUrl debe coincidir con tu ruta de login: "/login/doctor"
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login/doctor")
 
 
-# ----------------------------------------------------------------
-# DEPENDENCIA QUE PROPORCIONA UNA SESIÓN DE DB
-# ----------------------------------------------------------------
 
 def get_db() -> Session:
     db = SessionLocal()
@@ -61,11 +51,6 @@ def get_db() -> Session:
         yield db
     finally:
         db.close()
-
-
-# ----------------------------------------------------------------
-# Función que valida el token y extrae el correo ("sub")
-# ----------------------------------------------------------------
 
 def verify_access_token(token: str) -> str:
     """
@@ -86,11 +71,6 @@ def verify_access_token(token: str) -> str:
         return correo
     except JWTError:
         raise credentials_exception
-
-
-# ----------------------------------------------------------------
-# Dependencia que devuelve el modelo Doctor correspondiente al token
-# ----------------------------------------------------------------
 
 def get_current_doctor(
     token: str = Depends(oauth2_scheme),

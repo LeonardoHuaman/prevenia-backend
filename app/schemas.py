@@ -2,8 +2,8 @@
 
 from datetime import datetime
 from pydantic import BaseModel, EmailStr
+from typing import Optional
 
-# Esquema para crear un doctor (ya lo tenías):
 class DoctorCreate(BaseModel):
     nombre: str
     especialidad: str
@@ -21,7 +21,7 @@ class DoctorOut(BaseModel):
     clinic_name: str
 
     class Config:
-        from_attributes = True  # mapea directamente atributos del modelo SQLAlchemy
+        from_attributes = True  
 
 # Esquema para el token:
 class Token(BaseModel):
@@ -38,6 +38,29 @@ class DoctorLogin(BaseModel):
 class DoctorProfile(BaseModel):
     nombre: str
     clinic_name: str
+
+    class Config:
+        from_attributes = True
+
+class PacienteCreate(BaseModel):
+    dni: str
+    nombres: str
+    apellidos: str
+    edad: int
+    celular: str
+    correo: EmailStr
+    doctor_id: int     
+
+class PacienteOut(BaseModel):
+    id: int
+    dni: str
+    nombres: str
+    apellidos: str
+    edad: int
+    celular: str
+    correo: EmailStr
+    foto: Optional[str]
+    doctor_id: int
 
     class Config:
         from_attributes = True
