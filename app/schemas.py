@@ -36,6 +36,7 @@ class DoctorLogin(BaseModel):
     password: str
 
 class DoctorProfile(BaseModel):
+    id: int
     nombre: str
     clinic_name: str
 

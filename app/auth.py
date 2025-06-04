@@ -1,11 +1,7 @@
-# auth.py
-
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from typing import Optional
-
-# FastAPI / SQLAlchemy para la dependencia
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
@@ -32,18 +28,10 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 def decode_access_token(token: str) -> dict:
-    """
-    Decodifica el JWT y devuelve el payload si es válido.
-    Lanza JWTError en caso de token inválido o expirado.
-    """
     return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-
-
 
 # tokenUrl debe coincidir con tu ruta de login: "/login/doctor"
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login/doctor")
-
-
 
 def get_db() -> Session:
     db = SessionLocal()
@@ -53,11 +41,6 @@ def get_db() -> Session:
         db.close()
 
 def verify_access_token(token: str) -> str:
-    """
-    - Decodifica y valida el JWT.
-    - Extrae "sub" (correo) del payload.
-    - Lanza HTTPException(401) si falla la validación.
-    """
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="No se pudo validar las credenciales",
@@ -76,12 +59,6 @@ def get_current_doctor(
     token: str = Depends(oauth2_scheme),
     db: Session = Depends(get_db)
 ) -> models.Doctor:
-    """
-    1. Toma el token JWT del header (OAuth2PasswordBearer).
-    2. Lo valida en verify_access_token → retorna el correo.
-    3. Busca en BD el doctor con dicho correo.
-    4. Si no existe, lanza 401; si existe, lo devuelve.
-    """
     correo = verify_access_token(token)
     doctor = crud.get_doctor_by_email(db, correo)
     if doctor is None:

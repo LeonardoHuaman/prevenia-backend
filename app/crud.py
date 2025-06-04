@@ -28,10 +28,7 @@ def get_paciente_por_correo(db: Session, correo: str):
     return db.query(models.Paciente).filter(models.Paciente.correo == correo).first()
 
 def create_paciente(db: Session, paciente: schemas.PacienteCreate, foto_file: UploadFile) -> models.Paciente:
-    """
-    1. Guarda la foto en disco (en 'static/pacientes/') con un nombre único.
-    2. Crea el objeto Paciente en BD con el nombre de archivo.
-    """
+
     carpeta_destino = "static/pacientes"
     os.makedirs(carpeta_destino, exist_ok=True)
 
@@ -91,3 +88,13 @@ def create_paciente(db: Session, paciente: schemas.PacienteCreate, foto_file: Up
     db.commit()
     db.refresh(db_paciente)
     return db_paciente
+
+def get_pacientes_por_doctor(db: Session, doctor_id: int) -> list[models.Paciente]:
+    return (
+        db.query(models.Paciente)
+          .filter(models.Paciente.doctor_id == doctor_id)
+          .all()
+    )
+    
+def get_paciente_por_dni(db: Session, dni: str) -> models.Paciente | None:
+    return db.query(models.Paciente).filter(models.Paciente.dni == dni).first()
